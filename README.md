@@ -7,7 +7,9 @@ A gamified goal-tracking Progressive Web App that transforms the classic New Yea
 ![Status](https://img.shields.io/badge/Status-Active-success) ![Version](https://img.shields.io/badge/Version-9.0-blue) ![PWA](https://img.shields.io/badge/PWA-Ready-blueviolet) ![License](https://img.shields.io/badge/License-Proprietary-red)
 
 <p align="center">
-  <img src="bingo-preview.png" alt="Bingo Card Preview" width="400">
+  <img src="bingo-preview.png" alt="Bingo" width="30%">
+  <img src="vision-preview.png" alt="Vision" width="30%">
+  <img src="empty-preview.png" alt="Empty" width="30%">
 </p>
 
 ## Features
@@ -81,3 +83,5 @@ All data stays in your browser's `localStorage` — **nothing is sent to any ser
 ---
 
 *Built by [batuhania](https://github.com/batuhania)*
+
+![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&height=60&section=footer)
