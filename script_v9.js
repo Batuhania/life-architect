@@ -283,6 +283,7 @@ function toggleLanguage() {
     applyLanguage();
     render();
     updateStatsDisplay();
+    updateYearProgress();
 }
 
 // --- Performance Utilities ---
