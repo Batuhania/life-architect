@@ -1,0 +1,7 @@
+BACKUP_PRE_I18N/
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
+.vscode/
+.idea/

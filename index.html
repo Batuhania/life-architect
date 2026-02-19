@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 LIFE ARCHITECT | V9</title>
+
+    <!-- PWA & Mobile Meta -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ff4757">
+    <meta name="description" content="Track your goals and predictions with a gamified Bingo-style experience">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Phosphor Icons (Duotone) -->
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1" crossorigin="anonymous"></script>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+        crossorigin="anonymous"></script>
+
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body data-theme="light">
+
+    <!-- SPLASH SCREEN -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo"><i class="ph-duotone ph-target"></i></div>
+            <h1 class="splash-title">2026</h1>
+            <p class="splash-subtitle">LIFE ARCHITECT</p>
+            <div class="splash-loader">
+                <div class="splash-loader-bar"></div>
+            </div>
+            <p class="splash-tip">Turn your dreams into reality...</p>
+        </div>
+    </div>
+
+
+    <!-- SVG Layer for connections -->
+    <svg id="connectionLayer"
+        style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;"></svg>
+
+    <!-- Çinko Toast -->
+    <div id="cinkoToast"><i class="ph-duotone ph-trophy"></i> 1. ÇİNKO!</div>
+
+    <!-- Vision Mode Container -->
+    <div id="visionContainer">
+        <button class="vision-close" onclick="closeVisionMode()">×</button>
+        <div style="text-align:center; color:#fff; margin-bottom:30px; animation: fadeIn 2s;">
+            <h1 style="font-size:3rem; letter-spacing:5px; font-weight:300;">V I S I O N</h1>
+            <p style="opacity:0.6; margin-top:10px;" data-i18n="visionHint">Feel Your Future</p>
+        </div>
+        <div class="vision-grid" id="visionGrid"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="nav-top">
+            <div class="app-title">2026 <span>VISION</span></div>
+            <div class="controls">
+                <div class="rank-display" id="userRank">Rookie</div>
+                <button class="control-btn" onclick="openRandomGen()" title="Random"><i
+                        class="ph-duotone ph-dice-five"></i></button>
+                <button class="control-btn" onclick="openSettings()" title="Settings"><i
+                        class="ph-duotone ph-gear-six"></i></button>
+                <button class="control-btn" onclick="openDailyModal()" title="Daily Mood"><i
+                        class="ph-duotone ph-smiley"></i></button>
+            </div>
+        </div>
+
+        <div class="mode-switch">
+            <button class="mode-btn active" onclick="switchMode('predictions')" id="btnModePred"><i
+                    class="ph-duotone ph-crystal-ball"></i> <span data-i18n="predictions">Predictions</span></button>
+            <button class="mode-btn" onclick="switchMode('goals')" id="btnModeGoal"><i class="ph-duotone ph-target"></i>
+                <span data-i18n="goals">Goals</span></button>
+        </div>
+
+        <div class="toolbar">
+            <div class="toolbar-top-row">
+                <div class="view-switcher">
+                    <button class="view-btn active" onclick="switchView('list')" id="btnList"><i
+                            class="ph-duotone ph-list-bullets"></i> <span data-i18n="list">List</span></button>
+                    <button class="view-btn" onclick="switchView('grid')" id="btnGrid"><i
+                            class="ph-duotone ph-grid-four"></i> <span data-i18n="bingo">Bingo</span></button>
+                    <button class="view-btn" onclick="openVisionMode()"><i class="ph-duotone ph-eye"></i>
+                        <span data-i18n="vision">Vision</span></button>
+                </div>
+
+                <select id="sortSelect" class="sort-select" onchange="changeSort(this.value)">
+                    <option value="manual" data-i18n="sortManual">Manual (Drag)</option>
+                    <option value="create-desc" data-i18n="sortCreateDesc">Added (Newest)</option>
+                    <option value="create-asc" data-i18n="sortCreateAsc">Added (Oldest)</option>
+                    <option value="date-asc" data-i18n="sortDateAsc">Date (Nearest)</option>
+                    <option value="date-desc" data-i18n="sortDateDesc">Date (Farthest)</option>
+                    <option value="diff" data-i18n="sortDiff">Difficulty</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="font-size:0.8rem; color:var(--text-muted); font-weight:600; white-space:nowrap;" id="progressText">
+            0/0</div>
+
+        <!-- V9: Year Progress Widget -->
+        <div class="year-progress-container">
+            <div class="year-progress-bar">
+                <div class="year-progress-fill" id="yearProgressFill"></div>
+            </div>
+            <div class="year-progress-label" id="yearProgressLabel">Loading...</div>
+        </div>
+    </div>
+    <!-- MAIN CONTAINER -->
+    <div class="container" id="mainContainer"></div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-state-icon">
+            <i class="ph-duotone ph-shooting-star"></i>
+        </div>
+        <h3 class="empty-state-title" data-i18n="emptyTitle">No dreams yet!</h3>
+        <p class="empty-state-text" data-i18n="emptyText">Start your journey by adding your first goal</p>
+        <div class="empty-state-arrow">
+            <i class="ph-duotone ph-arrow-bend-right-down"></i>
+        </div>
+    </div>
+
+    <!-- Fullscreen & Sound Toggle Buttons -->
+    <button class="fullscreen-btn" onclick="toggleFullscreen()" title="Fullscreen"><i
+            class="ph-duotone ph-arrows-out"></i></button>
+    <button class="sound-toggle" onclick="toggleSound()" id="soundToggle" title="Sound"><i
+            class="ph-duotone ph-speaker-high" id="soundIcon"></i></button>
+
+    <!-- FAB Button -->
+    <button class="fab" onclick="openAddModal()">+</button>
+
+    <!-- V9.8: WELCOME MODAL -->
+    <div class="modal" id="welcomeModal">
+        <div class="modal-content" style="text-align:center; max-width:400px;">
+            <div style="font-size:3rem; color:var(--accent); margin-bottom:10px;">
+                <i class="ph-duotone ph-rocket-launch"></i>
+            </div>
+            <h2 style="font-size:1.8rem;" data-i18n="welcomeTitle">Welcome!</h2>
+            <p style="color:var(--text-muted); font-size:1.1rem; margin:15px 0 25px 0; line-height:1.6;"
+                data-i18n="welcomeDesc">
+                This isn't just a Bingo.<br>
+                <strong>2026 Life Architect</strong> is where you design and track your dreams.
+            </p>
+            <div class="welcome-features"
+                style="text-align:left; background:rgba(0,0,0,0.03); padding:15px; border-radius:15px; margin-bottom:25px; font-size:0.9rem;">
+                <div style="margin-bottom:8px;">🎯 <strong data-i18n="welcomeGoals">Goals:</strong> <span
+                        data-i18n="welcomeGoalsDesc">Track your progress.</span></div>
+                <div style="margin-bottom:8px;">🔮 <strong data-i18n="welcomePredictions">Predictions:</strong> <span
+                        data-i18n="welcomePredictionsDesc">Leave notes for the future.</span></div>
+                <div>🔥 <strong data-i18n="welcomeProgress">Progress:</strong> <span
+                        data-i18n="welcomeProgressDesc">Make every day of the year count.</span></div>
+            </div>
+            <button class="btn btn-primary" onclick="closeWelcome()" style="width:100%; padding:15px; font-size:1.1rem;"
+                data-i18n="welcomeBtn">Start the Journey ✨</button>
+        </div>
+    </div>
+
+    <!-- V9: DAILY MOOD MODAL -->
+    <div class="modal" id="dailyModal">
+        <div class="modal-content" style="text-align:center;">
+            <h2 data-i18n="moodTitle">How Are You Feeling Today?</h2>
+            <p style="color:var(--text-muted); margin-bottom:20px;" data-i18n="moodDesc">Pick the mood that fits your
+                day.</p>
+
+            <div class="mood-grid">
+                <button class="mood-btn" onclick="selectMood('fire')" data-mood="fire">
+                    <div class="mood-emoji">🔥</div>
+                    <div class="mood-label" data-i18n="moodFire">Energetic</div>
+                </button>
+                <button class="mood-btn" onclick="selectMood('zen')" data-mood="zen">
+                    <div class="mood-emoji">🧘</div>
+                    <div class="mood-label" data-i18n="moodZen">Balanced</div>
+                </button>
+                <button class="mood-btn" onclick="selectMood('focus')" data-mood="focus">
+                    <div class="mood-emoji">⚡</div>
+                    <div class="mood-label" data-i18n="moodFocus">Focused</div>
+                </button>
+                <button class="mood-btn" onclick="selectMood('happy')" data-mood="happy">
+                    <div class="mood-emoji">🎯</div>
+                    <div class="mood-label" data-i18n="moodHappy">Ambitious</div>
+                </button>
+                <button class="mood-btn" onclick="selectMood('tired')" data-mood="tired">
+                    <div class="mood-emoji">😴</div>
+                    <div class="mood-label" data-i18n="moodTired">Tired</div>
+                </button>
+            </div>
+
+            <button class="btn btn-secondary" onclick="closeModal('dailyModal')" style="margin-top:20px;"
+                data-i18n="close">Close</button>
+        </div>
+    </div>
+
+    <!-- ITEM MODAL -->
+    <div class="modal" id="itemModal">
+        <div class="modal-content">
+            <h2 id="modalTitle" data-i18n="newGoal">New Goal</h2>
+            <div class="form-group">
+                <label class="form-label" data-i18n="titleLabel">Title</label>
+                <input type="text" id="inpText" placeholder="E.g: Run a marathon...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" data-i18n="categoryLabel">Category</label>
+                <div style="display:flex; gap:10px;">
+                    <select id="inpCat" style="flex:1"></select>
+                    <button class="btn btn-secondary" style="width:auto; margin:0;" onclick="openCatManager()"><i
+                            class="ph-duotone ph-plus"></i></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" data-i18n="dateLabel">Target Date (Optional)</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="date" id="inpDate" style="flex:1;">
+                    <button class="btn btn-secondary" style="width:auto; margin:0; white-space:nowrap;"
+                        onclick="setYearEnd()"><i class="ph-duotone ph-flag-checkered"></i> <span
+                            data-i18n="yearEnd">Year End</span></button>
+                </div>
+            </div>
+
+            <div class="form-group" id="subGoalSection">
+                <label class="form-label" data-i18n="subGoals">Sub Goals</label>
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <div style="flex:2">
+                        <input type="text" id="inpSubText" placeholder="Step..." style="margin-bottom:0;">
+                    </div>
+                    <select id="inpSubDiff" style="flex:1; padding:16px 5px;">
+                        <option value="Easy" data-i18n="diffEasy">Easy</option>
+                        <option value="Medium" selected data-i18n="diffMedium">Medium</option>
+                        <option value="Hard" data-i18n="diffHard">Hard</option>
+                    </select>
+                    <button class="btn btn-secondary" style="margin:0; width:auto; padding:16px;"
+                        onclick="addSubGoal()">+</button>
+                </div>
+                <div class="sub-goal-list" id="subGoalList"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" data-i18n="imageNotes">Image / Notes</label>
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <label class="btn btn-secondary" for="inpFile" style="padding:10px;flex:1;cursor:pointer;">📷
+                        <span data-i18n="file">File</span></label>
+                    <button class="btn btn-secondary" onclick="toggleImgMode('url')" style="padding:10px;flex:1;">🔗
+                        URL</button>
+                </div>
+                <div id="imgFileContainer"><input type="file" id="inpFile" accept="image/*" hidden
+                        onchange="handleFileSelect(this)">
+                    <div class="file-upload-btn" id="filePreviewText"
+                        style="padding:10px; border:1px dashed var(--text-muted); text-align:center;"
+                        data-i18n="noImage">No Image</div>
+                </div>
+                <input type="text" id="inpImgUrl" class="hidden" placeholder="https://...">
+                <textarea id="inpNotes" placeholder="Notes..." style="margin-top:10px;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" data-i18n="difficulty">Difficulty</label>
+                <select id="inpDiff">
+                    <option value="Easy" data-i18n="diffEasyXP">Easy (1 XP)</option>
+                    <option value="Medium" selected data-i18n="diffMediumXP">Medium (3 XP)</option>
+                    <option value="Hard" data-i18n="diffHardXP">Hard (5 XP)</option>
+                    <option value="Impossible" data-i18n="diffImpossibleXP">Impossible (10 XP)</option>
+                </select>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="closeModal('itemModal')" data-i18n="cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="saveItem()" data-i18n="save">Save</button>
+            </div>
+            <button class="btn btn-danger hidden" id="btnDelete" onclick="confirmDelete()"
+                data-i18n="delete">Delete</button>
+        </div>
+    </div>
+
+    <!-- RANDOM IDEAS MODAL (V8.6) -->
+    <div class="modal" id="randomModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2><i class="ph-duotone ph-dice-five"></i> <span data-i18n="randomIdea">Random Idea</span></h2>
+
+            <!-- Prediction Card -->
+            <div class="random-idea-card prediction">
+                <div class="random-card-header">
+                    <span class="random-type-badge prediction"><i class="ph-duotone ph-crystal-ball"></i> <span
+                            data-i18n="prediction">Prediction</span></span>
+                    <button class="random-refresh-btn" onclick="refreshRandomIdea('prediction')">
+                        <i class="ph-duotone ph-arrows-clockwise"></i>
+                    </button>
+                </div>
+                <p id="randomPredictionText" class="random-idea-text">Loading...</p>
+                <button class="btn btn-outline random-add-btn" onclick="useRandomIdea('prediction')">
+                    <i class="ph-duotone ph-plus-circle"></i> <span data-i18n="addToPredictions">Add to
+                        Predictions</span>
+                </button>
+            </div>
+
+            <!-- Goal Card -->
+            <div class="random-idea-card goal">
+                <div class="random-card-header">
+                    <span class="random-type-badge goal"><i class="ph-duotone ph-target"></i> <span
+                            data-i18n="goal">Goal</span></span>
+                    <button class="random-refresh-btn" onclick="refreshRandomIdea('goal')">
+                        <i class="ph-duotone ph-arrows-clockwise"></i>
+                    </button>
+                </div>
+                <p id="randomGoalText" class="random-idea-text">Loading...</p>
+                <button class="btn btn-outline random-add-btn" onclick="useRandomIdea('goal')">
+                    <i class="ph-duotone ph-plus-circle"></i> <span data-i18n="addToGoals">Add to Goals</span>
+                </button>
+            </div>
+
+            <button class="btn btn-secondary" onclick="closeModal('randomModal')" style="margin-top: 15px;"
+                data-i18n="close">Close</button>
+        </div>
+    </div>
+
+    <!-- CATEGORY MANAGER MODAL -->
+    <div class="modal" id="catModal">
+        <div class="modal-content">
+            <h2 data-i18n="categories">Categories</h2>
+            <div id="catList" style="margin-bottom:20px;"></div>
+            <div class="form-group" style="display:flex; gap:10px; align-items:center;">
+                <input type="color" id="newCatColor" value="#535c68" style="width:50px; padding:0; height:50px;">
+                <input type="text" id="newCatName" placeholder="New Category...">
+                <button class="btn btn-primary" style="width:auto; margin:0;" onclick="addCategory()"
+                    data-i18n="add">Add</button>
+            </div>
+            <button class="btn btn-secondary" onclick="closeModal('catModal')" data-i18n="close">Close</button>
+        </div>
+    </div>
+
+    <!-- DETAIL MODAL -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <h2 id="detailTitle" data-i18n="detail">Detail</h2>
+            <div id="detailList"></div>
+            <button class="btn btn-primary" onclick="closeModal('detailModal')" data-i18n="ok">OK</button>
+            <button class="btn btn-secondary" onclick="editFromDetail()" data-i18n="edit">Edit</button>
+        </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h2><i class="ph-duotone ph-gear-six"></i> <span data-i18n="settings">Settings</span></h2>
+
+            <!-- Feature Buttons -->
+            <div class="settings-feature-btn" onclick="closeModal('settingsModal'); openStats();">
+                <span class="icon"><i class="ph-duotone ph-chart-bar"></i></span>
+                <div class="text">
+                    <div class="title" data-i18n="statistics">Statistics</div>
+                    <div class="desc" data-i18n="statsDesc">Progress and difficulty breakdown</div>
+                </div>
+            </div>
+            <div class="settings-feature-btn" onclick="closeModal('settingsModal'); openBadges();">
+                <span class="icon"><i class="ph-duotone ph-trophy"></i></span>
+                <div class="text">
+                    <div class="title" data-i18n="badges">Badges</div>
+                    <div class="desc" data-i18n="badgesDesc">Earned achievements</div>
+                </div>
+            </div>
+            <div class="settings-feature-btn" onclick="closeModal('settingsModal'); openShareModal();">
+                <span class="icon"><i class="ph-duotone ph-share-network"></i></span>
+                <div class="text">
+                    <div class="title" data-i18n="share">Share</div>
+                    <div class="desc" data-i18n="shareDesc">Share your bingo card</div>
+                </div>
+            </div>
+            <div class="settings-feature-btn" onclick="requestNotificationPermission();">
+                <span class="icon"><i class="ph-duotone ph-bell"></i></span>
+                <div class="text">
+                    <div class="title" data-i18n="notifications">Notifications</div>
+                    <div class="desc" data-i18n="notifDesc">Goal reminders</div>
+                </div>
+            </div>
+
+            <hr style="margin: 15px 0; border: none; border-top: 1px solid var(--border-color);">
+
+            <div style="margin-bottom: 20px;">
+                <div
+                    style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:600; color:var(--text-main);">
+                    <span><i class="ph-duotone ph-squares-four"></i> <span data-i18n="bingoSize">Bingo
+                            Size</span></span>
+                    <span id="gridSizeLabelSettings">5x5</span>
+                </div>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;" data-i18n="bingoSizeHint">
+                    You can change this at the bottom of the Bingo screen.</div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="toggleLanguage()"><i class="ph-duotone ph-translate"></i> <span
+                    data-i18n="langToggle">Türkçe</span></button>
+            <button class="btn btn-secondary" onclick="cycleTheme()"><i class="ph-duotone ph-palette"></i> <span
+                    data-i18n="changeTheme">Change Theme</span></button>
+            <button class="btn btn-secondary" onclick="toggleFontSize()"><i class="ph-duotone ph-text-aa"></i> <span
+                    data-i18n="fontSize">Font Size</span></button>
+            <button class="btn btn-secondary" onclick="exportData()"><i class="ph-duotone ph-download-simple"></i>
+                <span data-i18n="backup">Backup</span></button>
+            <button class="btn btn-secondary" onclick="document.getElementById('fileInp').click()"><i
+                    class="ph-duotone ph-upload-simple"></i> <span data-i18n="restore">Restore</span></button>
+            <input type="file" id="fileInp" hidden onchange="importData(this)">
+            <button class="btn btn-danger" onclick="resetApp()"><i class="ph-duotone ph-trash"></i> <span
+                    data-i18n="reset">Reset</span></button>
+            <button class="btn btn-primary" onclick="closeModal('settingsModal')" data-i18n="close">Close</button>
+        </div>
+    </div>
+
+    <!-- DIALOG MODAL -->
+    <div class="modal" id="dialogModal">
+        <div class="modal-content" style="text-align:center;">
+            <h3 id="dialogTitle"></h3>
+            <p id="dialogMsg"></p>
+            <div class="btn-row" id="dialogBtns"></div>
+        </div>
+    </div>
+
+    <!-- STATISTICS MODAL -->
+    <div class="modal" id="statsModal">
+        <div class="modal-content">
+            <h2><i class="ph-duotone ph-chart-bar"></i> <span data-i18n="statistics">Statistics</span></h2>
+
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ph-duotone ph-target"></i></div>
+                    <div class="stat-value" id="statTotalItems">0</div>
+                    <div class="stat-label" data-i18n="totalGoals">Total Goals</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ph-duotone ph-check-circle"></i></div>
+                    <div class="stat-value" id="statCompleted">0</div>
+                    <div class="stat-label" data-i18n="completed">Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ph-duotone ph-star"></i></div>
+                    <div class="stat-value" id="statTotalXP">0</div>
+                    <div class="stat-label" data-i18n="totalXP">Total XP</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ph-duotone ph-flame"></i></div>
+                    <div class="stat-value" id="statStreak">0</div>
+                    <div class="stat-label" data-i18n="dayStreak">Day Streak</div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <h3 data-i18n="progress">Progress</h3>
+                <div class="big-progress">
+                    <div class="big-progress-bar" id="overallProgress"></div>
+                </div>
+                <div class="progress-label" id="progressLabel">0%</div>
+            </div>
+
+            <div class="difficulty-breakdown">
+                <h3 data-i18n="diffBreakdown">Difficulty Breakdown</h3>
+                <div id="difficultyBars"></div>
+            </div>
+
+            <button class="btn btn-primary" onclick="closeModal('statsModal')" data-i18n="close">Close</button>
+        </div>
+    </div>
+
+    <!-- BADGES MODAL -->
+    <div class="modal" id="badgesModal">
+        <div class="modal-content">
+            <h2><i class="ph-duotone ph-trophy"></i> <span data-i18n="badges">Badges</span></h2>
+            <div class="badges-grid" id="badgesGrid"></div>
+            <button class="btn btn-primary" onclick="closeModal('badgesModal')" data-i18n="close">Close</button>
+        </div>
+    </div>
+
+    <!-- SHARE MODAL -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content" style="text-align:center;">
+            <h2><i class="ph-duotone ph-share-network"></i> <span data-i18n="share">Share</span></h2>
+            <div id="sharePreview" style="margin:20px 0; border-radius:12px; overflow:hidden;"></div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="downloadBingoImage()"><i
+                        class="ph-duotone ph-download-simple"></i> <span data-i18n="saveImg">Save</span></button>
+                <button class="btn btn-primary" onclick="shareBingo()"><i class="ph-duotone ph-share"></i>
+                    <span data-i18n="share">Share</span></button>
+            </div>
+            <button class="btn btn-secondary" onclick="closeModal('shareModal')" style="margin-top:10px;"
+                data-i18n="close">Close</button>
+        </div>
+    </div>
+
+    <!-- Modular JavaScript -->
+    <!-- Floating Grid Controls (Context Aware) -->
+    <div id="floatingGridControls" class="floating-controls hidden">
+        <div class="glass-pill">
+            <button class="pill-btn" id="bingoEditToggle" onclick="toggleBingoEditMode()" title="Edit Mode">
+                <i class="ph-duotone ph-lock-simple" id="bingoLockIcon"></i>
+            </button>
+            <span class="pill-divider"></span>
+            <span class="pill-icon"><i class="ph-duotone ph-squares-four"></i></span>
+            <span id="floatingSizeLabel">5x5</span>
+            <input type="range" id="floatingGridInput" min="3" max="12" value="5" oninput="updateGridSize(this.value)"
+                class="mini-slider">
+        </div>
+    </div>
+
+
+
+    <!-- JavaScript Application -->
+    <script src="script_v9.js"></script>
+</body>
+
+</html>
