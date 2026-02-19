@@ -48,7 +48,8 @@ const LANG = {
         settings: 'Ayarlar',
         statistics: 'İstatistikler', statsDesc: 'İlerleme ve zorluk dağılımı',
         badges: 'Rozetler', badgesDesc: 'Kazanılan başarılar',
-        share: 'Paylaş', shareDesc: 'Bingo kartını paylaş',
+        share: 'Paylaş', shareDesc: 'Bingo kartını paylaş', print: 'Yazdır',
+        shareBingoText: '2026 Bingo Kartıma göz atın! 🎰', uncomplete: 'Tamamlanmadı Yap',
         notifications: 'Bildirimler', notifDesc: 'Hedef hatırlatıcı',
         bingoSize: 'Bingo Boyutu', bingoSizeHint: 'Bingo ekranında alt kısımda değiştirebilirsin.',
         changeTheme: 'Tema Değiştir', fontSize: 'Yazı Boyutu',
@@ -170,7 +171,8 @@ const LANG = {
         settings: 'Settings',
         statistics: 'Statistics', statsDesc: 'Progress and difficulty distribution',
         badges: 'Badges', badgesDesc: 'Earned achievements',
-        share: 'Share', shareDesc: 'Share your bingo card',
+        share: 'Share', shareDesc: 'Share your bingo card', print: 'Print',
+        shareBingoText: 'Check out my 2026 Bingo Card! 🎰', uncomplete: 'Mark Incomplete',
         notifications: 'Notifications', notifDesc: 'Goal reminder',
         bingoSize: 'Bingo Size', bingoSizeHint: 'You can change it at the bottom of the Bingo view.',
         changeTheme: 'Change Theme', fontSize: 'Font Size',
@@ -837,75 +839,134 @@ function render() {
             container.appendChild(div);
         });
     } else {
-        // GRID FRAME
-        container.className = 'container grid-view';
-        const size = parseInt(appData.config.gridSize);
-        container.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+        // BINGO FRAME
+        container.className = 'container';
+        container.style.gridTemplateColumns = '';
 
-        // Calculate Bingo Rows Status
-        const bingoStatus = checkBingoStatus(items, size);
+        // Don't render bingo frame if there are no items
+        if (items.length === 0) {
+            // empty — container will show empty state below
+        } else {
 
-        items.forEach((item, index) => {
-            const cat = appData.categories.find(c => c.id == item.catId) || appData.categories[0];
-            const div = document.createElement('div');
+            const size = parseInt(appData.config.gridSize);
 
-            // Check if this item belongs to a completed row
-            // Row completion status for styling
-            const rowIndex = Math.floor(index / size);
-            const isRowComplete = bingoStatus.completedRowIndices.includes(rowIndex);
+            // Build frame wrapper
+            const frame = document.createElement('div');
+            frame.className = 'bingo-frame';
 
-            // Grid card styling
-            div.className = `grid-card ${item.completed ? 'completed' : ''} ${isRowComplete ? 'row-complete-bg' : ''} ${bingoEditMode ? 'wiggle' : ''}`;
-            div.dataset.id = item.id;
-            div.dataset.index = index;
+            // Header letters based on grid size
+            const headerTexts = { 3: ['2', '0', '26'], 4: ['B', 'I', 'N', 'G'], 5: ['B', 'I', 'N', 'G', 'O'] };
+            const letters = headerTexts[size] || headerTexts[5];
+            const header = document.createElement('div');
+            header.className = 'bingo-header';
+            letters.forEach(l => {
+                const span = document.createElement('span');
+                span.className = 'bingo-header-letter';
+                span.textContent = l;
+                header.appendChild(span);
+            });
+            frame.appendChild(header);
 
-            // Drag & Drop handlers for Edit Mode
-            if (bingoEditMode) {
-                div.draggable = true;
-                div.addEventListener('dragstart', handleGridDragStart);
-                div.addEventListener('dragover', handleGridDragOver);
-                div.addEventListener('drop', handleGridDrop);
-                div.addEventListener('dragend', handleGridDragEnd);
+            // Grid inside frame
+            const grid = document.createElement('div');
+            grid.className = 'grid-view';
+            grid.id = 'bingoGrid';
+            grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
 
-                div.addEventListener('touchstart', handleGridTouchStart, { passive: false });
-                div.addEventListener('touchmove', handleGridTouchMove, { passive: false });
-                div.addEventListener('touchend', handleGridTouchEnd);
-            }
+            // Calculate Bingo Status (rows + columns + diagonals)
+            const bingoStatus = checkBingoStatus(items, size);
+            const centerIndex = (size === 5) ? 12 : -1;
 
-            // Click handling
-            div.onclick = (e) => {
-                if (bingoEditMode) return; // Don't toggle in edit mode
-                if (appData.config.mode === 'goals' || (item.subItems && item.subItems.length > 0)) {
-                    openDetailModal(item.id);
-                } else {
-                    toggleComplete(item.id);
+            items.forEach((item, index) => {
+                const cat = appData.categories.find(c => c.id == item.catId) || appData.categories[0];
+                const div = document.createElement('div');
+
+                // Check if this cell is part of any completed line
+                const isLineComplete = bingoStatus.completedCells.has(index);
+
+                // Center star (free space) for 5×5
+                const isFreeSpace = (index === centerIndex);
+
+                div.className = `grid-card ${item.completed || isFreeSpace ? 'completed' : ''} ${isLineComplete ? 'line-complete-bg' : ''} ${bingoEditMode ? 'wiggle' : ''} ${isFreeSpace ? 'free-space' : ''}`;
+                div.dataset.id = item.id;
+                div.dataset.index = index;
+
+                // Drag & Drop handlers for Edit Mode
+                if (bingoEditMode && !isFreeSpace) {
+                    div.draggable = true;
+                    div.addEventListener('dragstart', handleGridDragStart);
+                    div.addEventListener('dragover', handleGridDragOver);
+                    div.addEventListener('drop', handleGridDrop);
+                    div.addEventListener('dragend', handleGridDragEnd);
+
+                    div.addEventListener('touchstart', handleGridTouchStart, { passive: false });
+                    div.addEventListener('touchmove', handleGridTouchMove, { passive: false });
+                    div.addEventListener('touchend', handleGridTouchEnd);
                 }
-            };
-            div.oncontextmenu = (e) => { e.preventDefault(); openEdit(item.id); };
 
-            // Countdown Overlay
-            if (item.date && !item.completed) {
-                const daysLeft = Math.ceil((new Date(item.date) - new Date()) / (1000 * 60 * 60 * 24));
-                let txt = daysLeft < 0 ? t('expired') : daysLeft === 0 ? t('today') : t('daysLeft').replace('{n}', daysLeft);
-                div.innerHTML += `<div class="grid-countdown">${txt}</div>`;
-            }
+                // Click handling
+                if (!isFreeSpace) {
+                    div.onclick = (e) => {
+                        if (bingoEditMode) return;
+                        if (item.completed) {
+                            // Completed items → show detail/edit modal
+                            openEdit(item.id);
+                        } else if (appData.config.mode === 'goals' || (item.subItems && item.subItems.length > 0)) {
+                            openDetailModal(item.id);
+                        } else {
+                            toggleComplete(item.id);
+                        }
+                    };
+                    div.oncontextmenu = (e) => { e.preventDefault(); openEdit(item.id); };
+                }
 
-            // Progress
-            if (item.subItems && item.subItems.length > 0) {
-                const done = item.subItems.filter(s => s.completed).length;
-                const pct = (done / item.subItems.length) * 100;
-                div.innerHTML += `<div class="grid-progress"><div class="grid-progress-bar" style="width:${pct}%"></div></div>`;
-            }
+                // Free space gets a star
+                if (isFreeSpace) {
+                    div.innerHTML = '<div class="free-star">⭐</div>';
+                    // Auto-complete the free space
+                    if (!item.completed) { item.completed = true; item.completedAt = Date.now(); }
+                } else {
+                    // Countdown Overlay
+                    if (item.date && !item.completed) {
+                        const daysLeft = Math.ceil((new Date(item.date) - new Date()) / (1000 * 60 * 60 * 24));
+                        let txt = daysLeft < 0 ? t('expired') : daysLeft === 0 ? t('today') : t('daysLeft').replace('{n}', daysLeft);
+                        div.innerHTML += `<div class="grid-countdown">${txt}</div>`;
+                    }
 
-            // Stamp & Content
-            const safeImg = item.img ? escapeHtml(item.img) : '';
-            div.innerHTML += `
-                <div class="grid-card-bg" style="background-image: url('${safeImg}')"></div>
-                <span class="grid-content">${escapeHtml(item.text)}</span>
-                <div class="stamp-mark"><i class="ph-duotone ph-check-fat"></i></div>
-            `;
-            container.appendChild(div);
-        });
+                    // Progress
+                    if (item.subItems && item.subItems.length > 0) {
+                        const done = item.subItems.filter(s => s.completed).length;
+                        const pct = (done / item.subItems.length) * 100;
+                        div.innerHTML += `<div class="grid-progress"><div class="grid-progress-bar" style="width:${pct}%"></div></div>`;
+                    }
+
+                    // Stamp & Content
+                    const safeImg = item.img ? escapeHtml(item.img) : '';
+                    div.innerHTML += `
+                    <div class="grid-card-bg" style="background-image: url('${safeImg}')"></div>
+                    <span class="grid-content">${escapeHtml(item.text)}</span>
+                    <div class="stamp-mark"></div>
+                `;
+                }
+                grid.appendChild(div);
+            });
+
+            frame.appendChild(grid);
+            container.appendChild(frame);
+
+            // Share & Print action buttons
+            const actions = document.createElement('div');
+            actions.className = 'bingo-actions';
+            actions.innerHTML = `
+            <button class="bingo-action-btn" onclick="shareBingoCard()">
+                <i class="ph-duotone ph-share-network"></i> ${t('share') || 'Share'}
+            </button>
+            <button class="bingo-action-btn" onclick="printBingoCard()">
+                <i class="ph-duotone ph-printer"></i> ${t('print') || 'Print'}
+            </button>
+        `;
+            container.appendChild(actions);
+        } // end if items.length > 0
     }
     // Autosave removed from render() for performance
     // save() is now only called when data actually changes
@@ -1202,6 +1263,8 @@ function openAddModal() {
     renderSubGoalList();
 
     document.getElementById('btnDelete').classList.add('hidden');
+    const btnUnc = document.getElementById('btnUncomplete');
+    if (btnUnc) btnUnc.classList.add('hidden');
     openModal('itemModal');
 }
 
@@ -1251,74 +1314,130 @@ function openEdit(id) {
     document.getElementById('filePreviewText').innerText = item.img ? t('imageExists') : t('noImage');
     updateYearEndButton(item.date === '2026-12-31');
     renderCatOptions(item.catId); renderSubGoalList();
+
+    // Show delete button when editing
+    document.getElementById('btnDelete').classList.remove('hidden');
+
+    // Show uncomplete button if item is completed
+    const btnUnc = document.getElementById('btnUncomplete');
+    if (btnUnc) {
+        if (item.completed) {
+            btnUnc.classList.remove('hidden');
+        } else {
+            btnUnc.classList.add('hidden');
+        }
+    }
+
     openModal('itemModal');
+}
+
+function uncompleteFromModal() {
+    if (!editingId) return;
+    const item = appData.items.find(i => i.id === editingId);
+    if (!item) return;
+    item.completed = false;
+    item.completedAt = null;
+    save();
+    closeModal('itemModal');
+    render();
+    lastBingoLineCount = 0; // Reset so re-checking works
 }
 
 /* ================================================================= */
 /*  Bingo Game Logic                                                 */
 /* ================================================================= */
 
-let lastBingoRowEventCount = 0;
+let lastBingoLineCount = 0;
 
 /**
- * Checks the grid for completed rows (Bingo/Çinko).
- * @param {Array} items - List of items
- * @param {number} size - Grid size (e.g., 5)
- * @returns {Object} Object containing completed row indices
+ * Checks the grid for completed lines (rows, columns, diagonals).
+ * Center cell (index 12) counts as completed for 5×5 grids.
  */
 function checkBingoStatus(items, size) {
-    let completedRowIndices = [];
+    const completedCells = new Set();
+    let lineCount = 0;
+    const total = size * size;
 
-    if (items.length < size) return { completedRowIndices };
+    if (items.length < size) return { completedCells, lineCount };
 
+    const isCompleted = (idx) => {
+        if (idx >= items.length) return false;
+        if (size === 5 && idx === 12) return true; // free space
+        return !!items[idx].completed;
+    };
+
+    // Check rows
     for (let r = 0; r < size; r++) {
-        let rowComplete = true;
+        let complete = true;
         for (let c = 0; c < size; c++) {
-            const idx = r * size + c;
-            if (idx < items.length) {
-                if (!items[idx].completed) {
-                    rowComplete = false; break;
-                }
-            } else {
-                rowComplete = false; break;
-            }
+            if (!isCompleted(r * size + c)) { complete = false; break; }
         }
-        if (rowComplete) completedRowIndices.push(r);
+        if (complete) {
+            lineCount++;
+            for (let c = 0; c < size; c++) completedCells.add(r * size + c);
+        }
     }
 
-    return { completedRowIndices };
+    // Check columns
+    for (let c = 0; c < size; c++) {
+        let complete = true;
+        for (let r = 0; r < size; r++) {
+            if (!isCompleted(r * size + c)) { complete = false; break; }
+        }
+        if (complete) {
+            lineCount++;
+            for (let r = 0; r < size; r++) completedCells.add(r * size + c);
+        }
+    }
+
+    // Check diagonals (only for grids >= 3)
+    if (size >= 3) {
+        // Top-left to bottom-right
+        let d1 = true;
+        for (let i = 0; i < size; i++) {
+            if (!isCompleted(i * size + i)) { d1 = false; break; }
+        }
+        if (d1) {
+            lineCount++;
+            for (let i = 0; i < size; i++) completedCells.add(i * size + i);
+        }
+
+        // Top-right to bottom-left
+        let d2 = true;
+        for (let i = 0; i < size; i++) {
+            if (!isCompleted(i * size + (size - 1 - i))) { d2 = false; break; }
+        }
+        if (d2) {
+            lineCount++;
+            for (let i = 0; i < size; i++) completedCells.add(i * size + (size - 1 - i));
+        }
+    }
+
+    return { completedCells, lineCount };
 }
 
 function triggerCinkoReview() {
     let sortedItems = getSortedItems();
-
     const size = parseInt(appData.config.gridSize);
     const status = checkBingoStatus(sortedItems, size);
 
-    // Instant Row Styling (No full render needed)
-    const container = document.getElementById('mainContainer');
-    if (appData.config.view === 'grid' && container) {
-        const cards = [...container.children];
-        // Reset
-        cards.forEach(c => c.classList.remove('row-complete-bg'));
-        // Apply
-        status.completedRowIndices.forEach(rowIndex => {
-            const start = rowIndex * size;
-            for (let k = 0; k < size; k++) {
-                if (cards[start + k]) cards[start + k].classList.add('row-complete-bg');
-            }
+    // Instant Cell Styling
+    const grid = document.getElementById('bingoGrid');
+    if (appData.config.view === 'grid' && grid) {
+        const cards = [...grid.children];
+        cards.forEach((c, i) => {
+            c.classList.toggle('line-complete-bg', status.completedCells.has(i));
         });
     }
 
-    const cinkoCount = status.completedRowIndices.length;
-
-    if (cinkoCount > lastBingoRowEventCount) {
-        let msg = t('cinko').replace('{n}', cinkoCount);
-        if (cinkoCount === size) msg = t('tombola');
+    if (status.lineCount > lastBingoLineCount) {
+        const totalLines = size + size + 2; // rows + cols + 2 diags
+        let msg = t('cinko').replace('{n}', status.lineCount);
+        if (status.lineCount === totalLines) msg = t('tombola');
         showCinkoToast(msg);
-        safeConfetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
+        safeConfetti({ particleCount: 80, spread: 90, origin: { y: 0.5 } });
     }
-    lastBingoRowEventCount = cinkoCount;
+    lastBingoLineCount = status.lineCount;
 }
 
 function showCinkoToast(msg) {
@@ -1326,6 +1445,97 @@ function showCinkoToast(msg) {
     el.innerText = msg;
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/**
+ * Share bingo card as image using html2canvas + Web Share API
+ */
+async function shareBingoCard() {
+    const frame = document.querySelector('.bingo-frame');
+    if (!frame) return;
+
+    try {
+        const canvas = await html2canvas(frame, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+            useCORS: true,
+            logging: false
+        });
+
+        canvas.toBlob(async (blob) => {
+            if (!blob) return;
+
+            const file = new File([blob], '2026-bingo-card.png', { type: 'image/png' });
+
+            // Try native share (mobile)
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        title: '2026 Bingo Card',
+                        text: t('shareBingoText') || 'Check out my 2026 Bingo Card! 🎰',
+                        files: [file]
+                    });
+                    return;
+                } catch (e) {
+                    // User cancelled or share failed, fall through to download
+                }
+            }
+
+            // Fallback: download
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '2026-bingo-card.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 'image/png');
+    } catch (e) {
+        console.warn('Share failed:', e);
+    }
+}
+
+/**
+ * Print bingo card as image (uses html2canvas for pixel-perfect output)
+ */
+async function printBingoCard() {
+    const frame = document.querySelector('.bingo-frame');
+    if (!frame) return;
+
+    try {
+        const canvas = await html2canvas(frame, {
+            backgroundColor: '#ffffff',
+            scale: 2,
+            useCORS: true,
+            logging: false
+        });
+
+        const dataUrl = canvas.toDataURL('image/png');
+        const printWin = window.open('', '_blank');
+        if (!printWin) return;
+
+        printWin.document.write(`<!DOCTYPE html>
+<html>
+<head>
+    <title>2026 Bingo Card</title>
+    <style>
+        body { display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; background:#fff; }
+        img { max-width:100%; max-height:90vh; }
+        @media print { body { background:#fff; } @page { margin: 1cm; } }
+    </style>
+</head>
+<body><img src="${dataUrl}" alt="2026 Bingo Card"></body>
+</html>`);
+
+        printWin.document.close();
+        setTimeout(() => {
+            printWin.print();
+            printWin.close();
+        }, 300);
+    } catch (e) {
+        console.warn('Print failed:', e);
+    }
 }
 
 function toggleComplete(id) {

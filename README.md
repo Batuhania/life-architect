@@ -6,6 +6,10 @@ A gamified goal-tracking Progressive Web App that transforms the classic New Yea
 
 ![Status](https://img.shields.io/badge/Status-Active-success) ![Version](https://img.shields.io/badge/Version-9.0-blue) ![PWA](https://img.shields.io/badge/PWA-Ready-blueviolet) ![License](https://img.shields.io/badge/License-Proprietary-red)
 
+<p align="center">
+  <img src="bingo-preview.png" alt="Bingo Card Preview" width="400">
+</p>
+
 ## Features
 
 ### Premium UI
