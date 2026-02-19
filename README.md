@@ -1,4 +1,4 @@
-﻿# 2026 Vision: New Year Bingo
+# 2026 Vision: New Year Bingo
 
 **Turn your 2026 into a game.**
 
@@ -48,11 +48,11 @@ Fill your grid, mark off achievements with satisfying animations, earn XP, level
 | Effects | [canvas-confetti](https://github.com/catdad/canvas-confetti) |
 | Icons | [Phosphor Icons](https://phosphoricons.com) (Duotone) |
 | Fonts | Inter (Google Fonts) |
-| Build | None - zero dependencies, open \index.html\ |
+| Build | None - zero dependencies, open `index.html` |
 
 ## Quick Start
 
-\\\ash
+```ash
 # Clone
 git clone https://github.com/batuhania/life-architect.git
 cd life-architect
@@ -60,7 +60,7 @@ cd life-architect
 # Option 1: Just open index.html in your browser
 # Option 2: Use a local server (recommended for PWA)
 npx http-server .
-\\\
+```
 
 ---
 
