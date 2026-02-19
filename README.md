@@ -1,8 +1,10 @@
-# 2026 Life Architect 🎯
+# 2026 Vision: New Year Bingo �
 
-> *"You can't hit a target you can't see, and you can't see a target you don't have."*
+**Turn your 2026 into a game.**
 
-A gamified goal-tracking Progressive Web App that transforms the classic New Year's Bingo experience into a modern, interactive life planning tool.
+Forget boring resolutions. **2026 Vision Bingo** gamifies your year by turning your goals, predictions, and bucket list items into a beautiful, interactive Bingo card. 
+
+Fill your grid, mark off achievements with satisfying animations, earn XP, level up, and aim for a "Full House" life win!
 
 ![Status](https://img.shields.io/badge/Status-Active-success) ![Version](https://img.shields.io/badge/Version-9.0-blue) ![PWA](https://img.shields.io/badge/PWA-Ready-blueviolet) ![License](https://img.shields.io/badge/License-Proprietary-red)
 

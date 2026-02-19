@@ -1,7 +1,7 @@
 {
-    "name": "2026 Life Architect",
-    "short_name": "Life Architect",
-    "description": "Hedeflerini ve tahminlerini takip et, Bingo tarzında oyunlaştırılmış deneyim",
+    "name": "2026 Vision: New Year Bingo",
+    "short_name": "Vision Bingo",
+    "description": "Turn your 2026 goals into a game. Complete life achievements, mark your bingo card, and win your year.",
     "start_url": "./index.html",
     "scope": "./",
     "id": "/life-architect-2026",
