@@ -1,4 +1,4 @@
-# 2026 Vision: New Year Bingo �
+﻿# 2026 Vision: New Year Bingo
 
 **Turn your 2026 into a game.**
 
@@ -22,17 +22,17 @@ Fill your grid, mark off achievements with satisfying animations, earn XP, level
 - Three themes: Light, Dark, Cyberpunk
 
 ### Core Modules
-- **Predictions Mode** — track what you think will happen in 2026
-- **Goals Mode** — set actionable life goals with deadlines
-- **Bingo View** — classic grid with row-completion (Bingo!) celebrations
-- **Vision Board** — image-driven inspiration wall
-- **List View** — sortable, drag-and-drop task management
+- **Predictions Mode** â€” track what you think will happen in 2026
+- **Goals Mode** â€” set actionable life goals with deadlines
+- **Bingo View** â€” classic grid with row-completion (Bingo!) celebrations
+- **Vision Board** â€” image-driven inspiration wall
+- **List View** â€” sortable, drag-and-drop task management
 
 ### Gamification Engine
-- **XP & Levels** — earn points for completing goals (Easy: 1XP → Impossible: 10XP)
-- **31 Badges** — from "First Goal" to "God Mode" and "Perfect Week"
-- **Streak System** — daily login rewards with milestone celebrations
-- **Confetti Effects** — throttled & optimized for mobile performance
+- **XP & Levels** â€” earn points for completing goals (Easy: 1XP â†’ Impossible: 10XP)
+- **31 Badges** â€” from "First Goal" to "God Mode" and "Perfect Week"
+- **Streak System** â€” daily login rewards with milestone celebrations
+- **Confetti Effects** â€” throttled & optimized for mobile performance
 
 ### i18n
 - Full English and Turkish language support
@@ -48,7 +48,7 @@ Fill your grid, mark off achievements with satisfying animations, earn XP, level
 | Effects | [canvas-confetti](https://github.com/catdad/canvas-confetti) |
 | Icons | [Phosphor Icons](https://phosphoricons.com) (Duotone) |
 | Fonts | Inter (Google Fonts) |
-| Build | None — zero dependencies, open `index.html` |
+| Build | None â€” zero dependencies, open `index.html` |
 
 ## Quick Start
 
@@ -62,28 +62,29 @@ cd life-architect
 
 # Option 2: Local server (recommended for PWA)
 python -m http.server 8000
-# → http://localhost:8000
+# â†’ http://localhost:8000
 ```
 
 ## Project Structure
 
 ```
-├── index.html          # App shell & all modals
-├── style.css           # Design system (60KB of pure CSS)
-├── script_v9.js        # App logic, i18n, gamification
-├── sw.js               # Service Worker for offline support
-├── manifest.json       # PWA manifest
-├── icon.svg            # Vector app icon
-├── icon-192x192.png    # PWA icon (192px)
-└── icon-512x512.png    # PWA icon (512px)
+â”œâ”€â”€ index.html          # App shell & all modals
+â”œâ”€â”€ style.css           # Design system (60KB of pure CSS)
+â”œâ”€â”€ script_v9.js        # App logic, i18n, gamification
+â”œâ”€â”€ sw.js               # Service Worker for offline support
+â”œâ”€â”€ manifest.json       # PWA manifest
+â”œâ”€â”€ icon.svg            # Vector app icon
+â”œâ”€â”€ icon-192x192.png    # PWA icon (192px)
+â””â”€â”€ icon-512x512.png    # PWA icon (512px)
 ```
 
 ## Privacy
 
-All data stays in your browser's `localStorage` — **nothing is sent to any server**. The app works fully offline after first load. Backup/restore uses encrypted JSON export.
+All data stays in your browser's `localStorage` â€” **nothing is sent to any server**. The app works fully offline after first load. Backup/restore uses encrypted JSON export.
 
 ---
 
 *Built by [batuhania](https://github.com/batuhania)*
 
 ![Footer](https://capsule-render.vercel.app/api?type=waving&color=gradient&height=60&section=footer)
+
